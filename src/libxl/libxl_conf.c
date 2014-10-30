@@ -1015,7 +1015,7 @@ libxlMakeNic(virDomainDefPtr def,
      * x_nics[i].mtu = 1492;
      */
 
-    if (l_nic->script && !(actual_type == VIR_DOMAIN_NET_TYPE_BRIDGE ||
+    if ((l_nic->script || l_nic->downscript) && !(actual_type == VIR_DOMAIN_NET_TYPE_BRIDGE ||
                            actual_type == VIR_DOMAIN_NET_TYPE_ETHERNET)) {
         virReportError(VIR_ERR_CONFIG_UNSUPPORTED, "%s",
                        _("specifying a script is only supported with "
@@ -1049,7 +1049,8 @@ libxlMakeNic(virDomainDefPtr def,
                 return -1;
             /* fallthrough */
         case VIR_DOMAIN_NET_TYPE_ETHERNET:
-            if (VIR_STRDUP(x_nic->script, l_nic->script) < 0)
+            if ((VIR_STRDUP(x_nic->script, l_nic->script) < 0) ||
+                (VIR_STRDUP(x_nic->downscript, l_nic->downscript) < 0))
                 return -1;
             break;
         case VIR_DOMAIN_NET_TYPE_NETWORK:

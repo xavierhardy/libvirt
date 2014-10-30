@@ -564,12 +564,17 @@ xenParseSxprNets(virDomainDefPtr def,
                 if (net->type == VIR_DOMAIN_NET_TYPE_BRIDGE &&
                     VIR_STRDUP(net->script, tmp2) < 0)
                     goto cleanup;
+                if (net->type == VIR_DOMAIN_NET_TYPE_BRIDGE &&
+                    VIR_STRDUP(net->downscript, tmp2) < 0)
+                    goto cleanup;
                 tmp = sexpr_node(node, "device/vif/ip");
                 if (VIR_STRDUP(net->data.bridge.ipaddr, tmp) < 0)
                     goto cleanup;
             } else {
                 net->type = VIR_DOMAIN_NET_TYPE_ETHERNET;
                 if (VIR_STRDUP(net->script, tmp2) < 0)
+                    goto cleanup;
+                if (VIR_STRDUP(net->downscript, tmp2) < 0)
                     goto cleanup;
                 tmp = sexpr_node(node, "device/vif/ip");
                 if (VIR_STRDUP(net->data.ethernet.ipaddr, tmp) < 0)
@@ -1866,6 +1871,7 @@ xenFormatSxprNet(virConnectPtr conn,
                  int isAttach)
 {
     const char *script = DEFAULT_VIF_SCRIPT;
+    const char *downscript = NULL;
     char macaddr[VIR_MAC_STRING_BUFLEN];
 
     if (def->type != VIR_DOMAIN_NET_TYPE_BRIDGE &&
@@ -1875,7 +1881,7 @@ xenFormatSxprNet(virConnectPtr conn,
                        _("unsupported network type %d"), def->type);
         return -1;
     }
-    if (def->script &&
+    if ((def->script || def->downscript) &&
         def->type != VIR_DOMAIN_NET_TYPE_BRIDGE &&
         def->type != VIR_DOMAIN_NET_TYPE_ETHERNET) {
         virReportError(VIR_ERR_CONFIG_UNSUPPORTED,
@@ -1898,6 +1904,10 @@ xenFormatSxprNet(virConnectPtr conn,
             script = def->script;
 
         virBufferEscapeSexpr(buf, "(script '%s')", script);
+        if (def->downscript)
+            downscript = def->downscript;
+
+        virBufferEscapeSexpr(buf, "(downscript '%s')", downscript);
         if (def->data.bridge.ipaddr != NULL)
             virBufferEscapeSexpr(buf, "(ip '%s')", def->data.bridge.ipaddr);
         break;
@@ -1932,6 +1942,9 @@ xenFormatSxprNet(virConnectPtr conn,
         if (def->script)
             virBufferEscapeSexpr(buf, "(script '%s')",
                                  def->script);
+        if (def->downscript)
+            virBufferEscapeSexpr(buf, "(downscript '%s')",
+                                 def->downscript);
         if (def->data.ethernet.ipaddr != NULL)
             virBufferEscapeSexpr(buf, "(ip '%s')", def->data.ethernet.ipaddr);
         break;

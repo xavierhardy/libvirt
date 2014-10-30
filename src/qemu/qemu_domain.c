@@ -1999,7 +1999,7 @@ void qemuDomainObjCheckNetTaint(virQEMUDriverPtr driver,
      * any interface type. In any case, it's adding user sauce into
      * the soup, so it should taint the domain.
      */
-    if (net->script != NULL)
+    if (net->script || net->downscript)
         qemuDomainObjTaint(driver, obj, VIR_DOMAIN_TAINT_SHELL_SCRIPTS, logFD);
 }
 

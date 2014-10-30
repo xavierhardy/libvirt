@@ -967,6 +967,7 @@ struct _virDomainNetDef {
         unsigned long sndbuf;
     } tune;
     char *script;
+    char *downscript;
     char *ifname;
     char *ifname_guest;
     char *ifname_guest_actual;

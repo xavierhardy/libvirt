@@ -263,6 +263,12 @@ umlBuildCommandLineNet(virConnectPtr conn,
         goto error;
     }
 
+    if (def->downscript) {
+        virReportError(VIR_ERR_CONFIG_UNSUPPORTED, "%s",
+                       _("interface downscript execution not supported by this driver"));
+        goto error;
+    }
+
     virBufferAsprintf(&buf, ",%s", virMacAddrFormat(&def->mac, macaddr));
 
     if (def->type == VIR_DOMAIN_NET_TYPE_MCAST) {

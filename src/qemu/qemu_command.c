@@ -4568,7 +4568,7 @@ qemuBuildHostNetStr(virDomainNetDefPtr net,
     virQEMUDriverConfigPtr cfg = virQEMUDriverGetConfig(driver);
     size_t i;
 
-    if (net->script && netType != VIR_DOMAIN_NET_TYPE_ETHERNET) {
+    if ((net->script || net->downscript) && netType != VIR_DOMAIN_NET_TYPE_ETHERNET) {
         virReportError(VIR_ERR_CONFIG_UNSUPPORTED,
                        _("scripts are not supported on interfaces of type %s"),
                        virDomainNetTypeToString(netType));
@@ -4611,6 +4611,11 @@ qemuBuildHostNetStr(virDomainNetDefPtr net,
         if (net->script) {
             virBufferAsprintf(&buf, "%cscript=%s", type_sep,
                               net->script);
+            type_sep = ',';
+        }
+        if (net->downscript) {
+            virBufferAsprintf(&buf, "%cdownscript=%s", type_sep,
+                              net->downscript);
             type_sep = ',';
         }
         is_tap = true;
@@ -10717,6 +10722,10 @@ qemuParseCommandLineNet(virDomainXMLOptionPtr xmlopt,
         } else if (def->type == VIR_DOMAIN_NET_TYPE_ETHERNET &&
                    STREQ(keywords[i], "script") && STRNEQ(values[i], "")) {
             def->script = values[i];
+            values[i] = NULL;
+        } else if (def->type == VIR_DOMAIN_NET_TYPE_ETHERNET &&
+                   STREQ(keywords[i], "downscript") && STRNEQ(values[i], "")) {
+            def->downscript = values[i];
             values[i] = NULL;
         } else if (def->type == VIR_DOMAIN_NET_TYPE_ETHERNET &&
                    STREQ(keywords[i], "ifname")) {

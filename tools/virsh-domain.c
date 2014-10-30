@@ -767,6 +767,10 @@ static const vshCmdOptDef opts_attach_interface[] = {
      .type = VSH_OT_DATA,
      .help = N_("script used to bridge network interface")
     },
+    {.name = "downscript",
+     .type = VSH_OT_DATA,
+     .help = N_("script used to remove network interface from bridge")
+    },
     {.name = "model",
      .type = VSH_OT_DATA,
      .help = N_("model type")
@@ -837,7 +841,7 @@ static bool
 cmdAttachInterface(vshControl *ctl, const vshCmd *cmd)
 {
     virDomainPtr dom = NULL;
-    const char *mac = NULL, *target = NULL, *script = NULL,
+    const char *mac = NULL, *target = NULL, *script = NULL, *downscript = NULL,
                 *type = NULL, *source = NULL, *model = NULL,
                 *inboundStr = NULL, *outboundStr = NULL;
     virNetDevBandwidthRate inbound, outbound;
@@ -874,6 +878,7 @@ cmdAttachInterface(vshControl *ctl, const vshCmd *cmd)
         vshCommandOptStringReq(ctl, cmd, "target", &target) < 0 ||
         vshCommandOptStringReq(ctl, cmd, "mac", &mac) < 0 ||
         vshCommandOptStringReq(ctl, cmd, "script", &script) < 0 ||
+        vshCommandOptStringReq(ctl, cmd, "downscript", &downscript) < 0 ||
         vshCommandOptStringReq(ctl, cmd, "model", &model) < 0 ||
         vshCommandOptStringReq(ctl, cmd, "inbound", &inboundStr) < 0 ||
         vshCommandOptStringReq(ctl, cmd, "outbound", &outboundStr) < 0)
@@ -928,6 +933,8 @@ cmdAttachInterface(vshControl *ctl, const vshCmd *cmd)
         virBufferAsprintf(&buf, "<mac address='%s'/>\n", mac);
     if (script != NULL)
         virBufferAsprintf(&buf, "<script path='%s'/>\n", script);
+    if (script != NULL)
+        virBufferAsprintf(&buf, "<downscript path='%s'/>\n", downscript);
     if (model != NULL)
         virBufferAsprintf(&buf, "<model type='%s'/>\n", model);
 

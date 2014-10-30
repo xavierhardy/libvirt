@@ -1420,6 +1420,7 @@ void virDomainNetDefFree(virDomainNetDefPtr def)
     VIR_FREE(def->backend.vhost);
     VIR_FREE(def->virtPortProfile);
     VIR_FREE(def->script);
+    VIR_FREE(def->downscript);
     VIR_FREE(def->ifname);
     VIR_FREE(def->ifname_guest);
     VIR_FREE(def->ifname_guest_actual);
@@ -6993,6 +6994,7 @@ virDomainNetDefParseXML(virDomainXMLOptionPtr xmlopt,
     char *ifname_guest = NULL;
     char *ifname_guest_actual = NULL;
     char *script = NULL;
+    char *downscript = NULL;
     char *address = NULL;
     char *port = NULL;
     char *model = NULL;
@@ -7128,6 +7130,9 @@ virDomainNetDefParseXML(virDomainXMLOptionPtr xmlopt,
             } else if (!script &&
                        xmlStrEqual(cur->name, BAD_CAST "script")) {
                 script = virXMLPropString(cur, "path");
+            } else if (!downscript &&
+                       xmlStrEqual(cur->name, BAD_CAST "downscript")) {
+                downscript = virXMLPropString(cur, "path");
             } else if (xmlStrEqual(cur->name, BAD_CAST "model")) {
                 model = virXMLPropString(cur, "type");
             } else if (xmlStrEqual(cur->name, BAD_CAST "driver")) {
@@ -7427,6 +7432,10 @@ virDomainNetDefParseXML(virDomainXMLOptionPtr xmlopt,
         def->script = script;
         script = NULL;
     }
+    if (downscript != NULL) {
+        def->downscript = downscript;
+        downscript = NULL;
+    }
     if (ifname != NULL) {
         def->ifname = ifname;
         ifname = NULL;
@@ -7667,6 +7676,7 @@ virDomainNetDefParseXML(virDomainXMLOptionPtr xmlopt,
     VIR_FREE(dev);
     virDomainActualNetDefFree(actual);
     VIR_FREE(script);
+    VIR_FREE(downscript);
     VIR_FREE(bridge);
     VIR_FREE(model);
     VIR_FREE(backend);
@@ -17152,6 +17162,8 @@ virDomainNetDefFormat(virBufferPtr buf,
 
     virBufferEscapeString(buf, "<script path='%s'/>\n",
                           def->script);
+    virBufferEscapeString(buf, "<downscript path='%s'/>\n",
+                          def->downscript);
     if (def->ifname &&
         !((flags & VIR_DOMAIN_XML_INACTIVE) &&
           (STRPREFIX(def->ifname, VIR_NET_GENERATED_PREFIX)))) {

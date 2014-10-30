@@ -807,6 +807,7 @@ static int
 xenParseVif(virConfPtr conf, virDomainDefPtr def)
 {
     char *script = NULL;
+    char *downscript = NULL;
     virDomainNetDefPtr net = NULL;
     virConfValuePtr list = virConfGetValue(conf, "vif");
 
@@ -860,6 +861,11 @@ xenParseVif(virConfPtr conf, virDomainDefPtr def)
                     int len = nextkey ? (nextkey - data) : strlen(data);
                     VIR_FREE(script);
                     if (VIR_STRNDUP(script, data, len) < 0)
+                        goto cleanup;
+                } else if (STRPREFIX(key, "downscript=")) {
+                    int len = nextkey ? (nextkey - data) : strlen(data);
+                    VIR_FREE(downscript);
+                    if (VIR_STRNDUP(downscript, data, len) < 0)
                         goto cleanup;
                 } else if (STRPREFIX(key, "model=")) {
                     int len = nextkey ? (nextkey - data) : sizeof(model) - 1;
@@ -933,6 +939,10 @@ xenParseVif(virConfPtr conf, virDomainDefPtr def)
                 VIR_STRDUP(net->script, script) < 0)
                 goto cleanup;
 
+            if (script && script[0] &&
+                VIR_STRDUP(net->downscript, downscript) < 0)
+                goto cleanup;
+
             if (model[0] &&
                 VIR_STRDUP(net->model, model) < 0)
                 goto cleanup;
@@ -953,6 +963,7 @@ xenParseVif(virConfPtr conf, virDomainDefPtr def)
             virDomainNetDefFree(net);
             net = NULL;
             VIR_FREE(script);
+            VIR_FREE(downscript);
         }
     }
 
@@ -961,6 +972,7 @@ xenParseVif(virConfPtr conf, virDomainDefPtr def)
  cleanup:
     virDomainNetDefFree(net);
     VIR_FREE(script);
+    VIR_FREE(downscript);
     return -1;
 }
 
@@ -1233,6 +1245,8 @@ xenFormatNet(virConnectPtr conn,
     case VIR_DOMAIN_NET_TYPE_ETHERNET:
         if (net->script)
             virBufferAsprintf(&buf, ",script=%s", net->script);
+        if (net->downscript)
+            virBufferAsprintf(&buf, ",downscript=%s", net->downscript);
         if (net->data.ethernet.ipaddr)
             virBufferAsprintf(&buf, ",ip=%s", net->data.ethernet.ipaddr);
         break;

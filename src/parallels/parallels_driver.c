@@ -1878,6 +1878,12 @@ static int parallelsApplyIfaceParams(parallelsDomObjPtr pdom,
         goto cleanup;
     }
 
+    if (!STREQ_NULLABLE(oldnet->downscript, newnet->downscript)) {
+        virReportError(VIR_ERR_CONFIG_UNSUPPORTED, "%s",
+                       _("Setting tear down script is not supported"));
+        goto cleanup;
+    }
+
     if (!STREQ_NULLABLE(oldnet->filter, newnet->filter)) {
         virReportError(VIR_ERR_CONFIG_UNSUPPORTED, "%s",
                        _("Changing filter params is not supported"));

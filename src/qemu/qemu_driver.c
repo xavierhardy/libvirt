@@ -6360,6 +6360,7 @@ static char *qemuConnectDomainXMLToNative(virConnectPtr conn,
 
                 net->type = VIR_DOMAIN_NET_TYPE_ETHERNET;
                 net->script = NULL;
+                net->downscript = NULL;
                 net->data.ethernet.dev = brnamecopy;
                 net->data.ethernet.ipaddr = NULL;
             } else {
@@ -6371,6 +6372,7 @@ static char *qemuConnectDomainXMLToNative(virConnectPtr conn,
 
                 net->type = VIR_DOMAIN_NET_TYPE_ETHERNET;
                 net->script = NULL;
+                net->downscript = NULL;
                 net->data.ethernet.dev = NULL;
                 net->data.ethernet.ipaddr = NULL;
             }
@@ -6381,10 +6383,12 @@ static char *qemuConnectDomainXMLToNative(virConnectPtr conn,
 
             net->type = VIR_DOMAIN_NET_TYPE_ETHERNET;
             net->script = NULL;
+            net->downscript = NULL;
             net->data.ethernet.dev = NULL;
             net->data.ethernet.ipaddr = NULL;
         } else if (net->type == VIR_DOMAIN_NET_TYPE_BRIDGE) {
             char *script = net->script;
+            char *downscript = net->downscript;
             char *brname = net->data.bridge.brname;
             char *ipaddr = net->data.bridge.ipaddr;
 
@@ -6392,6 +6396,7 @@ static char *qemuConnectDomainXMLToNative(virConnectPtr conn,
 
             net->type = VIR_DOMAIN_NET_TYPE_ETHERNET;
             net->script = script;
+            net->downscript = downscript;
             net->data.ethernet.dev = brname;
             net->data.ethernet.ipaddr = ipaddr;
         }

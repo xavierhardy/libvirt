@@ -1307,6 +1307,7 @@ vboxAttachNetwork(virDomainDefPtr def, vboxGlobalData *data, IMachine *machine)
         } else if (def->nets[i]->type == VIR_DOMAIN_NET_TYPE_BRIDGE) {
             VIR_DEBUG("NIC(%zu): brname: %s", i, def->nets[i]->data.bridge.brname);
             VIR_DEBUG("NIC(%zu): script: %s", i, def->nets[i]->script);
+            VIR_DEBUG("NIC(%zu): downscript: %s", i, def->nets[i]->downscript);
             VIR_DEBUG("NIC(%zu): ipaddr: %s", i, def->nets[i]->data.bridge.ipaddr);
         }
 
